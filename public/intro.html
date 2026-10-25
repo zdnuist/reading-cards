@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>流动的书 · 让读过的书，真正流过你</title>
+<meta name="description" content="把散落在微信读书里的划线，变成每天重逢的复习卡片，并用 AI 帮你把每一句话真正读懂。" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<style>
+  :root{
+    --paper:#f6efe2; --paper2:#fbf6ec; --card:#fffdf8;
+    --ink:#33261a; --ink2:#5c4a35; --muted:#8a7a63;
+    --line:#e6dbc6; --line2:#d8c9ac;
+    --accent:#96551f; --accent2:#7a4318; --green:#0f6e56; --green-bg:#eaf3ec;
+    --serif:"Songti SC","Noto Serif CJK SC","Source Han Serif SC",Georgia,"Times New Roman",serif;
+    --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    --shadow:0 24px 60px -28px rgba(90,66,36,.34),0 2px 8px rgba(90,66,36,.08);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--paper2);color:var(--ink);font-family:var(--sans);line-height:1.75;-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  img{max-width:100%;display:block}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+  .serif{font-family:var(--serif)}
+
+  /* 顶部导航 */
+  .nav{position:sticky;top:0;z-index:50;background:rgba(251,246,236,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .nav-in{display:flex;align-items:center;justify-content:space-between;height:62px}
+  .nav-brand{display:flex;align-items:center;gap:10px;font-family:var(--serif);font-weight:600;font-size:19px;text-decoration:none}
+  .nav-mark{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#a75f26,#7a4318);color:#fff;display:grid;place-items:center;font-size:16px;box-shadow:0 2px 6px rgba(122,67,24,.35)}
+  .nav-links{display:flex;gap:26px;font-size:14px}
+  .nav-links a{text-decoration:none;color:var(--ink2);transition:color .2s}
+  .nav-links a:hover{color:var(--accent)}
+  .nav-cta{display:inline-flex;align-items:center;gap:6px;background:var(--accent);color:#fff;text-decoration:none;font-size:14px;font-weight:500;padding:9px 18px;border-radius:999px;box-shadow:0 4px 14px -4px rgba(150,85,31,.5);transition:transform .18s,background .18s}
+  .nav-cta:hover{background:var(--accent2);transform:translateY(-1px)}
+  @media(max-width:820px){.nav-links{display:none}}
+
+  /* Hero */
+  .hero{padding:74px 0 40px;text-align:center;position:relative;overflow:hidden}
+  .hero::before{content:"";position:absolute;inset:0;background:radial-gradient(720px 320px at 50% -40px,#f0e2c8,transparent 70%);pointer-events:none}
+  .badge{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--accent2);background:#f3e6d2;border:1px solid var(--line2);border-radius:999px;padding:5px 14px;margin-bottom:22px}
+  .badge b{font-weight:500}
+  .hero h1{font-family:var(--serif);font-size:clamp(34px,5.4vw,58px);line-height:1.22;font-weight:600;letter-spacing:1px}
+  .hero h1 em{font-style:normal;color:var(--accent);position:relative}
+  .hero h1 em::after{content:"";position:absolute;left:2%;right:2%;bottom:6px;height:10px;background:#f0d9b5;z-index:-1;border-radius:3px}
+  .hero p.sub{max-width:640px;margin:20px auto 0;font-size:17px;color:var(--ink2)}
+  .hero-cta{display:flex;gap:14px;justify-content:center;margin-top:30px;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-size:15px;font-weight:500;padding:13px 26px;border-radius:999px;transition:transform .18s,box-shadow .18s,background .18s}
+  .btn-p{background:var(--accent);color:#fff;box-shadow:0 10px 26px -10px rgba(150,85,31,.65)}
+  .btn-p:hover{background:var(--accent2);transform:translateY(-2px)}
+  .btn-g{background:#fff;color:var(--ink);border:1px solid var(--line2)}
+  .btn-g:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-2px)}
+  .hero-note{margin-top:16px;font-size:13px;color:var(--muted)}
+
+  /* 浏览器取景框 */
+  .frame{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:hidden}
+  .frame-bar{display:flex;align-items:center;gap:8px;padding:11px 15px;background:linear-gradient(#f7f0e3,#efe5d3);border-bottom:1px solid var(--line)}
+  .dots{display:flex;gap:6px}
+  .dots i{width:11px;height:11px;border-radius:50%}
+  .dots i:nth-child(1){background:#e0655b}.dots i:nth-child(2){background:#e6a23c}.dots i:nth-child(3){background:#5bb97e}
+  .url{flex:1;max-width:360px;margin-left:6px;font-size:12px;color:#a2947c;background:#fff;border:1px solid var(--line);border-radius:999px;padding:4px 14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .hero-shot{margin:44px auto 0;max-width:920px}
+  .hero-shot .frame img{width:100%;height:auto}
+
+  /* 通用区块 */
+  section{padding:70px 0}
+  .kicker{font-size:13px;letter-spacing:2px;color:var(--accent);font-weight:500;margin-bottom:12px}
+  h2.title{font-family:var(--serif);font-size:clamp(26px,3.4vw,38px);font-weight:600;line-height:1.3;margin-bottom:16px}
+  .lead{font-size:16px;color:var(--ink2);max-width:680px}
+  .center{text-align:center}
+  .center .lead{margin-left:auto;margin-right:auto}
+
+  /* 痛点 */
+  .pains{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:38px}
+  .pain{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px 24px}
+  .pain .q{font-size:30px;color:var(--line2);font-family:var(--serif);line-height:1}
+  .pain h3{font-size:17px;margin:10px 0 8px}
+  .pain p{font-size:14px;color:var(--ink2)}
+  @media(max-width:820px){.pains{grid-template-columns:1fr}}
+
+  /* 四步闭环 */
+  .flow{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:40px}
+  .step{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px 20px;position:relative}
+  .step .n{font-family:var(--serif);font-size:15px;color:#fff;background:linear-gradient(135deg,#a75f26,#7a4318);width:34px;height:34px;border-radius:10px;display:grid;place-items:center;margin-bottom:14px}
+  .step h3{font-size:16px;margin-bottom:6px}
+  .step p{font-size:13.5px;color:var(--ink2)}
+  @media(max-width:820px){.flow{grid-template-columns:1fr 1fr}}
+  @media(max-width:520px){.flow{grid-template-columns:1fr}}
+
+  /* 功能交替区块 */
+  .feat{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center}
+  .feat.rev .f-media{order:2}
+  .f-text h2{font-family:var(--serif);font-size:clamp(24px,3vw,34px);font-weight:600;line-height:1.32;margin-bottom:14px}
+  .f-text p{font-size:15.5px;color:var(--ink2);margin-bottom:14px}
+  .f-list{list-style:none;margin-top:8px}
+  .f-list li{position:relative;padding-left:26px;font-size:14.5px;color:var(--ink2);margin-bottom:9px}
+  .f-list li::before{content:"";position:absolute;left:2px;top:.62em;width:8px;height:8px;border-radius:50%;background:var(--accent)}
+  .f-media .frame img{width:100%;height:auto}
+  .tagai{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--green);background:var(--green-bg);border:1px solid #bfe0cc;border-radius:999px;padding:3px 12px;margin-bottom:12px}
+  @media(max-width:900px){.feat{grid-template-columns:1fr;gap:28px}.feat.rev .f-media{order:0}}
+
+  /* AI 高亮区 */
+  .ai-sec{background:linear-gradient(180deg,#f3ead9,#fbf6ec)}
+  .ai-quote{background:var(--card);border:1px solid var(--line2);border-left:4px solid var(--accent);border-radius:12px;padding:18px 20px;margin-top:18px;font-size:14px;color:var(--ink2)}
+  .ai-quote .k{font-weight:500;color:var(--accent2)}
+
+  /* 数据 */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:40px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:28px 20px;text-align:center}
+  .stat b{font-family:var(--serif);font-size:40px;color:var(--accent);display:block;line-height:1}
+  .stat span{font-size:13.5px;color:var(--ink2);margin-top:8px;display:block}
+  @media(max-width:820px){.stats{grid-template-columns:1fr 1fr}}
+
+  /* 访客模式 */
+  .guest{background:#eef3ee;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+
+  /* CTA */
+  .cta{text-align:center;padding:84px 0}
+  .cta h2{font-family:var(--serif);font-size:clamp(28px,4vw,44px);font-weight:600;margin-bottom:16px}
+  .cta p{color:var(--ink2);max-width:520px;margin:0 auto 30px}
+  footer{border-top:1px solid var(--line);padding:30px 0;font-size:13px;color:var(--muted)}
+  .foot-in{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center}
+  footer a{color:var(--accent);text-decoration:none}
+
+  /* 入场动效 */
+  .reveal{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s ease}
+  .reveal.in{opacity:1;transform:none}
+  @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}html{scroll-behavior:auto}}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap nav-in">
+    <a class="nav-brand" href="/intro.html"><span class="nav-mark">书</span>流动的书</a>
+    <div class="nav-links">
+      <a href="#how">怎么工作</a>
+      <a href="#features">功能</a>
+      <a href="#ai">AI 解读</a>
+      <a href="#guest">访客模式</a>
+      <a href="#data">数据</a>
+    </div>
+    <a class="nav-cta" href="/">打开应用 ↗</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="badge">📖 <b>WorkBuddy 1024 造物挑战</b> · 程序员节应用创作大赛</span>
+    <h1>让读过的书，<br>真正<em>流过你</em>一次</h1>
+    <p class="sub">「流动的书」把你散落在微信读书里的划线，变成每天重逢的复习卡片，并用 AI 帮你把每一句话<strong>真正读懂</strong>——收藏是终点，而这里是起点。</p>
+    <div class="hero-cta">
+      <a class="btn btn-p" href="/">▶ 打开应用，免密体验</a>
+      <a class="btn btn-g" href="#how">看看它怎么工作</a>
+    </div>
+    <p class="hero-note">打开即访客 · 无需安装 · 手机 / 电脑自适应 · 你的数据仅你可见</p>
+
+    <div class="hero-shot frame">
+      <div class="frame-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">43.142.123.164:8899 · 今日卡片</span></div>
+      <img src="/img/shot-home.png" alt="流动的书首页：今日卡片瀑布流、AI 每日导语与学习统计" width="1440" height="900" />
+    </div>
+  </div>
+</header>
+
+<section id="pain">
+  <div class="wrap">
+    <div class="center reveal">
+      <div class="kicker">为什么需要它</div>
+      <h2 class="title">读了很多书，划线很多，<br>却想不起来用过</h2>
+      <p class="lead">微信读书里成百上千条划线，划完就沉底，再没翻开过第二次。</p>
+    </div>
+    <div class="pains">
+      <div class="pain reveal"><div class="q">“</div><h3>划线即沉睡</h3><p>收藏夹越来越长，真正被重温、被用到的句子却越来越少。</p></div>
+      <div class="pain reveal"><div class="q">“</div><h3>收藏 ≠ 学会</h3><p>知识若不曾被你复述、追问、实践，就只是别人脑子里的过客。</p></div>
+      <div class="pain reveal"><div class="q">“</div><h3>缺少内化引导</h3><p>不知道如何把一句话，与自己的经验、别的书、实际行动连起来。</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="how" style="background:var(--paper)">
+  <div class="wrap">
+    <div class="center reveal">
+      <div class="kicker">核心方案</div>
+      <h2 class="title">一条让旧文字重新经过你的闭环</h2>
+      <p class="lead">划线 → 智能排期复习 → AI 解读内化 → 写下感悟与行动。</p>
+    </div>
+    <div class="flow">
+      <div class="step reveal"><div class="n">1</div><h3>自动汇聚</h3><p>同步微信读书划线，按“值得回味”的规则变成每日卡片。</p></div>
+      <div class="step reveal"><div class="n">2</div><h3>智能排期</h3><p>遗忘曲线安排复习：忘了 / 记得 / 简单，决定下次何时再见。</p></div>
+      <div class="step reveal"><div class="n">3</div><h3>AI 内化</h3><p>对划线生成解读、跨书联想与追问，逼你真正思考。</p></div>
+      <div class="step reveal"><div class="n">4</div><h3>落成行动</h3><p>写下此刻感悟与“因此做了什么”，知识才真正长在你身上。</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="features">
+  <div class="wrap">
+    <div class="feat reveal">
+      <div class="f-text">
+        <div class="kicker">每日精选</div>
+        <h2>每天 6 张卡片，<br>配一句 AI 导语</h2>
+        <p>每天 0 点自动换新。打开首页，今天的几张卡片与一句温柔的导语已在等你——先翻哪一张，都由你。</p>
+        <ul class="f-list"><li>每日自动换新，也可“换一批”随机回顾</li><li>今日打卡，记录连续学习的每一天</li><li>手机 / 电脑同样顺手</li></ul>
+      </div>
+      <div class="f-media frame">
+        <div class="frame-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">流动的书 · 今日卡片</span></div>
+        <img src="/img/shot-card.png" alt="一张每日精选卡片的正面：划线原文、书名与作者" width="520" height="700" />
+      </div>
+    </div>
+
+    <div class="feat rev reveal" style="margin-top:80px">
+      <div class="f-media frame">
+        <div class="frame-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">流动的书 · 卡片背面</span></div>
+        <img src="/img/shot-back.png" alt="卡片背面：当时的想法、现在的感悟与行动记录" width="520" height="700" />
+      </div>
+      <div class="f-text">
+        <div class="kicker">翻卡复习</div>
+        <h2>正面是文字，<br>背面是你和它的对话</h2>
+        <p>点开卡片翻到背面：当初在微信读书写下的想法、你现在的感悟与行动，都在这里沉淀。</p>
+        <ul class="f-list"><li>三档记忆反馈“忘了 / 记得 / 简单”驱动遗忘曲线</li><li>同感、收藏、一键成图分享</li><li>让每一次重逢，都比上一次更深一点</li></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="ai" class="ai-sec">
+  <div class="wrap">
+    <div class="feat reveal">
+      <div class="f-text">
+        <span class="tagai">✨ 大模型实时驱动</span>
+        <h2>点一下，AI 帮你<br>把这句话读懂</h2>
+        <p>对任意划线，「AI 解读」会实时生成三层输出：<strong>解读</strong>它的重心、<strong>联想</strong>你读过的其它书、再抛一个<strong>追问</strong>逼你思考。下面是线上对一条真实划线的实时生成——</p>
+        <div class="ai-quote">
+          <span class="k">联想 ·</span> “这不禁让人联想到《1984》中老大哥对真理的篡改——在绝对权力面前，流程不再是保障公平的基石，而是强者随意定义现实的工具。”
+        </div>
+        <ul class="f-list" style="margin-top:16px"><li>由 Qwen 大模型实时生成，约 4–5 秒</li><li>可插拔：切换任意模型；断网自动回退内置引擎，演示不中断</li></ul>
+      </div>
+      <div class="f-media frame">
+        <div class="frame-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">流动的书 · AI 解读</span></div>
+        <img src="/img/shot-ai.png" alt="AI 对一条划线实时生成的解读、联想与追问" width="640" height="420" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="features2">
+  <div class="wrap">
+    <div class="feat rev reveal">
+      <div class="f-media frame">
+        <div class="frame-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">流动的书 · 主题聚类</span></div>
+        <img src="/img/shot-topics.png" alt="主题聚类：不同书的划线按主题聚成网络" width="1440" height="900" />
+      </div>
+      <div class="f-text">
+        <div class="kicker">主题聚类</div>
+        <h2>看看同一件事，<br>不同作者怎么说</h2>
+        <p>不同书的划线会自动聚成主题网络。点开一个主题，你能看到各位作者对同一个问题的不同回答——你的知识地图，就此显形。</p>
+      </div>
+    </div>
+
+    <div class="feat reveal" style="margin-top:80px">
+      <div class="f-text">
+        <div class="kicker">成长仪表盘</div>
+        <h2>看得见的坚持，<br>与想得起的收获</h2>
+        <p>连续打卡天数、待复习、感悟与行动的分布和趋势，一屏尽览。学习这件事，第一次被量化地看见。</p>
+      </div>
+      <div class="f-media frame">
+        <div class="frame-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">流动的书 · 成长</span></div>
+        <img src="/img/shot-dashboard.png" alt="成长仪表盘：连续天数、感悟行动分布与趋势图" width="1440" height="900" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="background:var(--paper);padding-top:60px;padding-bottom:60px">
+  <div class="wrap">
+    <div class="center reveal" style="margin-bottom:34px">
+      <div class="kicker">卡片库</div>
+      <h2 class="title">4083 条划线，随时可检索</h2>
+      <p class="lead">按句子 / 书名 / 作者搜索，只看收藏，一页页翻回你读过的每一处心动。</p>
+    </div>
+    <div class="frame reveal" style="max-width:1000px;margin:0 auto">
+      <div class="frame-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">流动的书 · 卡片库</span></div>
+      <img src="/img/shot-library.png" alt="卡片库：可按句子书名作者搜索的划线卡片网格" width="1440" height="900" />
+    </div>
+  </div>
+</section>
+
+<section id="guest" class="guest">
+  <div class="wrap">
+    <div class="feat reveal">
+      <div class="f-text">
+        <div class="kicker">访客模式</div>
+        <h2>打开即访客，<br>人人一个独立空间</h2>
+        <p>不需要账号口令，点开链接就能体验：浏览主人分享的书库，写下自己的感悟与收藏。<strong>彼此隔离，也看不到主人的数据</strong>——一台服务、一个链接，就能让多人同时安全体验。</p>
+        <ul class="f-list"><li>管理员才需要站点口令，用于同步 / 备份 / 管理</li><li>访客的每一条感悟收藏，都只属于访客自己</li><li>为现场演示与多人共享而生</li></ul>
+      </div>
+      <div class="f-media frame" style="max-width:300px;margin:0 auto">
+        <div class="frame-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">手机端</span></div>
+        <img src="/img/shot-mobile.png" alt="手机端的今日卡片视图" width="390" height="844" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="data">
+  <div class="wrap">
+    <div class="center reveal">
+      <div class="kicker">已在线上运行</div>
+      <h2 class="title">真实数据，真实在用</h2>
+      <p class="lead">这不是概念稿，而是一个每天被真实使用的阅读复习助手。</p>
+    </div>
+    <div class="stats">
+      <div class="stat reveal"><b>920</b><span>本书</span></div>
+      <div class="stat reveal"><b>4083</b><span>条划线卡片</span></div>
+      <div class="stat reveal"><b>40+</b><span>个主题聚类</span></div>
+      <div class="stat reveal"><b>实时</b><span>遗忘曲线排期</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="cta" style="background:linear-gradient(180deg,#fbf6ec,#f3ead9)">
+  <div class="wrap reveal">
+    <h2>让过去的你，和现在的你，<br>每天重逢一次</h2>
+    <p>打开即访客，免密体验。写下的第一条感悟，只属于你。</p>
+    <a class="btn btn-p" href="/">▶ 立即打开「流动的书」</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-in">
+    <span>「流动的书」 · 用 WorkBuddy 从 0 到公网部署</span>
+    <span><a href="/">打开应用</a> · <a href="#how">回到顶部</a></span>
+  </div>
+</footer>
+
+<script>
+  (function(){
+    var els = document.querySelectorAll('.reveal');
+    if (!('IntersectionObserver' in window)) { els.forEach(function(e){e.classList.add('in')}); return; }
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){ if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } });
+    }, { threshold: 0.12 });
+    els.forEach(function(e){ io.observe(e); });
+  })();
+</script>
+</body>
+</html>
