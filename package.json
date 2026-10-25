@@ -1,0 +1,14 @@
+{
+  "name": "reading-cards",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "流动的书 — 阅读复习助手：把读过的书和划线变成每天复习的卡片",
+  "scripts": {
+    "start": "node --experimental-sqlite server.js",
+    "sync": "node --experimental-sqlite sync.js"
+  },
+  "engines": {
+    "node": ">=22.5.0"
+  }
+}

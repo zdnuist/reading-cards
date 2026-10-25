@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>流动的书 · 阅读复习助手</title>
+<link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">书</span>
+    <div class="brand-txt">
+      <b>流动的书</b>
+      <small>让读过的书，真正流过你</small>
+    </div>
+  </div>
+  <nav class="tabs" id="tabs">
+    <button class="tab active" data-view="today">今日卡片</button>
+    <button class="tab" data-view="library">卡片库</button>
+    <button class="tab" data-view="favorites">收藏夹</button>
+    <button class="tab" data-view="insights">我的感悟</button>
+    <button class="tab" data-view="books">书架</button>
+    <button class="tab" data-view="topics">主题</button>
+    <button class="tab" data-view="dashboard">成长</button>
+  </nav>
+  <div class="topbar-right">
+    <button class="btn ghost" id="btnBackup" title="把数据库存一份到 data/backups（保留最近 7 份）">备份</button>
+    <button class="btn ghost" id="btnSync">同步微信读书</button>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="setup hidden" id="setupBar">
+    <span class="setup-ic">!</span>
+    <div class="setup-tx">
+      <b>还没有配置微信读书 API Key</b>
+      <p>在终端里执行 <code>export WEREAD_API_KEY=wrk-xxxxxxxx</code>，再重启服务（<code>npm start</code>），然后点右上角「同步微信读书」。<br>
+      页面其他功能（手写感悟、收藏、成图、主题）不受影响，只是拿不到你的书籍和划线。</p>
+    </div>
+  </div>
+
+  <!-- ============ 今日 ============ -->
+  <section class="view" id="view-today">
+    <div class="hero">
+      <div class="hero-l">
+        <div class="date" id="todayDate">—</div>
+        <p class="hero-sub">今天，让这几段文字重新经过你一次。</p>
+      </div>
+      <div class="hero-r">
+        <div class="stat"><b id="stStreak">0</b><span>连续天数</span></div>
+        <div class="stat"><b id="stCards">0</b><span>卡片总数</span></div>
+        <div class="stat"><b id="stFav">0</b><span>收藏</span></div>
+        <div class="stat"><b id="stDue">0</b><span>待复习</span></div>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="tool-left">
+        <span class="lbl">今日推荐</span>
+        <span class="tip" id="todayTip"></span>
+      </div>
+      <div class="tool-right">
+        <button class="btn" id="btnShuffle">换一批</button>
+        <button class="btn primary" id="btnCheckin">今日打卡</button>
+      </div>
+    </div>
+
+    <div class="cards" id="todayCards"></div>
+  </section>
+
+  <!-- ============ 卡片库 ============ -->
+  <section class="view hidden" id="view-library">
+    <div class="toolbar">
+      <div class="tool-left">
+        <input class="input" id="libSearch" placeholder="搜索句子 / 书名 / 作者…" />
+        <select class="input" id="libBook"><option value="">全部书籍</option></select>
+        <label class="chk"><input type="checkbox" id="libFavOnly" /> 只看收藏</label>
+      </div>
+      <div class="tool-right">
+        <button class="btn ghost" id="libPrev">上一页</button>
+        <span class="pager" id="libPager">1 / 1</span>
+        <button class="btn ghost" id="libNext">下一页</button>
+      </div>
+    </div>
+    <div class="cards" id="libCards"></div>
+  </section>
+
+  <!-- ============ 收藏夹 ============ -->
+  <section class="view hidden" id="view-favorites">
+    <div class="toolbar">
+      <div class="tool-left"><span class="lbl">收藏夹</span><span class="tip">记录你收藏它时的时间和当时心里的那句话</span></div>
+    </div>
+    <div class="list" id="favList"></div>
+  </section>
+
+  <!-- ============ 我的感悟 ============ -->
+  <section class="view hidden" id="view-insights">
+    <div class="toolbar">
+      <div class="tool-left">
+        <span class="lbl">我的感悟与行动</span>
+        <span class="tip" id="insightTip"></span>
+      </div>
+      <div class="tool-right">
+        <button class="btn ghost" id="btnExport">导出 Markdown</button>
+      </div>
+    </div>
+    <div class="timeline" id="insightList"></div>
+  </section>
+
+  <!-- ============ 书架 ============ -->
+  <section class="view hidden" id="view-books">
+    <div class="toolbar">
+      <div class="tool-left">
+        <input class="input" id="bookSearch" placeholder="搜索书名 / 作者…" />
+        <label class="chk"><input type="checkbox" id="bookHasNotes" checked /> 只看有划线的</label>
+      </div>
+      <div class="tool-right">
+        <button class="btn primary" id="btnAddBook">+ 新增书籍</button>
+      </div>
+    </div>
+    <div class="books" id="bookList"></div>
+  </section>
+
+  <!-- ============ 主题 ============ -->
+  <section class="view hidden" id="view-topics">
+    <div class="toolbar" id="topicListBar">
+      <div class="tool-left">
+        <span class="lbl">主题</span>
+        <span class="tip" id="topicTip"></span>
+      </div>
+      <div class="tool-right">
+        <button class="btn ghost" id="btnRebuildTopics">重新聚类</button>
+      </div>
+    </div>
+    <div id="topicWrap">
+      <div class="topics" id="topicList"></div>
+    </div>
+    <div id="topicCardsWrap" class="hidden">
+      <div class="toolbar">
+        <div class="tool-left">
+          <button class="btn ghost" id="topicBack">← 全部主题</button>
+          <span class="lbl" id="topicName"></span>
+        </div>
+        <div class="tool-right">
+          <button class="btn ghost" id="tcPrev">上一页</button>
+          <span class="pager" id="tcPager">1 / 1</span>
+          <button class="btn ghost" id="tcNext">下一页</button>
+        </div>
+      </div>
+      <div class="cards" id="topicCards"></div>
+    </div>
+  </section>
+
+  <!-- ============ 成长看板 ============ -->
+  <section class="view hidden" id="view-dashboard">
+    <div class="toolbar">
+      <div class="tool-left"><span class="lbl">成长看板</span><span class="tip">衡量的不是读了多少，而是留下了多少</span></div>
+      <div class="tool-right">
+        <select class="input" id="dashDays">
+          <option value="14">近 14 天</option>
+          <option value="30" selected>近 30 天</option>
+          <option value="60">近 60 天</option>
+        </select>
+      </div>
+    </div>
+    <div id="dashBody"></div>
+    <div class="panel">
+      <h3>数据备份</h3>
+      <p class="ph">你写下的感悟、收藏和复习记录只存在本地这一个文件里。
+        服务每天首次启动会自动备份一次，保留最近 7 份。</p>
+      <div class="bkrow" style="border-bottom:0;padding-top:4px">
+        <div class="nm">上次备份<em id="bkLast">—</em></div>
+        <div class="vl" id="bkFiles">—</div>
+      </div>
+      <div class="modal-foot" style="justify-content:flex-start;margin-top:12px">
+        <button class="btn primary" id="btnBackup2">立即备份</button>
+        <button class="btn ghost" id="btnExportJson">导出我的数据（JSON）</button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- 新增书籍弹窗 -->
+<div class="modal hidden" id="bookModal">
+  <div class="modal-box">
+    <h3>新增一本书</h3>
+    <p class="modal-sub">不在微信读书里的书（纸质书、PDF、播客）也可以建卡复习</p>
+    <label>书名<input class="input" id="nbTitle" placeholder="必填" /></label>
+    <label>作者<input class="input" id="nbAuthor" /></label>
+    <label>分类<input class="input" id="nbCategory" placeholder="如：心理 / 商业 / 技术" /></label>
+    <label>封面图 URL<input class="input" id="nbCover" placeholder="可留空" /></label>
+    <div class="modal-foot">
+      <button class="btn ghost" id="nbCancel">取消</button>
+      <button class="btn primary" id="nbSave">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 收藏 / 取消收藏时记录感悟 -->
+<div class="modal hidden" id="noteModal">
+  <div class="modal-box">
+    <h3 id="nmTitle">收藏这张卡片</h3>
+    <p class="modal-sub">写下此刻的想法，它会连同时间一起留在收藏夹里</p>
+    <textarea class="input area" id="nmText" placeholder="此刻我在想…（可留空）"></textarea>
+    <div class="modal-foot">
+      <button class="btn ghost" id="nmCancel">取消</button>
+      <button class="btn primary" id="nmSave">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 卡片成图预览 -->
+<div class="modal hidden" id="shareModal">
+  <div class="modal-box share-box">
+    <h3>卡片成图</h3>
+    <p class="modal-sub">可以直接保存，也可以分享给同样读过这本书的人</p>
+    <div class="share-preview"><img id="shareImg" alt="卡片海报" /></div>
+    <div class="modal-foot">
+      <button class="btn ghost" id="shCancel">关闭</button>
+      <button class="btn primary" id="shDown">下载图片</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="/app.js"></script>
+</body>
+</html>
