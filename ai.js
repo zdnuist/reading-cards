@@ -112,6 +112,7 @@ async function llmInterpret(text, ctx = {}) {
       body: JSON.stringify({
         model: MODEL,
         temperature: 0.85,
+        ...(process.env.LLM_ENABLE_THINKING === '1' ? {} : { enable_thinking: false }),
         messages: [
           { role: 'system', content: sys },
           { role: 'user', content: user },
