@@ -1146,7 +1146,7 @@
     const isOwner = !!me.owner;
     $('#modeText').textContent = isOwner
       ? '管理员模式 · 已登录：可同步 / 备份 / 导出 / 管理书籍'
-      : '访客模式 · 以游客身份浏览，你写的感悟与收藏仅自己可见';
+      : '访客模式 · 欢迎体验《流动的书》—— 你看到的书籍由主人分享，你写下的感悟与收藏仅自己可见';
     $('#modeBar').classList.toggle('guest', !isOwner);
     $('#modeBar').classList.toggle('owner', isOwner);
 
