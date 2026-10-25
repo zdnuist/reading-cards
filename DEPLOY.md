@@ -75,6 +75,25 @@ chmod 600 .env
 - `SESSION_SECRET`：管理员 Cookie 的 HMAC 签名密钥，必须随机且保密。
   生成：`openssl rand -hex 32`。泄露会让他人伪造管理员身份。
 
+**2b. 智能解读层（可选，推荐）**
+
+填 `LLM_API_KEY` / `LLM_BASE_URL` / `LLM_MODEL` 即启用大模型「AI 解读 / 每日导语」；
+任一项缺失则自动走内置模板引擎，功能照常可用（离线/演示无忧）。以硅基流动为例：
+
+```bash
+# .env 追加（注意 BASE_URL 到 /v1 为止，代码自动拼 /chat/completions）
+LLM_API_KEY=sk-你的key
+LLM_BASE_URL=https://api.siliconflow.cn/v1
+LLM_MODEL=Qwen/Qwen3.5-35B-A3B
+LLM_TIMEOUT_MS=60000
+LLM_ENABLE_THINKING=0      # 关闭推理模型思考，Qwen3.x 秒回；需要长思考设 1
+systemctl restart reading-cards
+```
+
+> 推理模型（如 Qwen3.x）默认会输出超长思维链，容易触发超时回退；
+> 代码已默认发送 `enable_thinking:false` 关闭思考，通常 1–5 秒返回。
+> 任何 OpenAI 兼容端点（通义 / DeepSeek / OpenAI…）都可接入。
+
 **3. 进程守护（systemd）**
 
 `/etc/systemd/system/reading-cards.service`：
