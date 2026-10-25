@@ -62,9 +62,18 @@ rsync -av --exclude data --exclude node_modules \
 ```bash
 cd /opt/reading-cards
 cp .env.example .env
-vi .env         # 填入 WEREAD_API_KEY=wrk-xxxxxxxx
+vi .env         # 填入 WEREAD_API_KEY / SITE_PASSWORD / SESSION_SECRET
 chmod 600 .env
 ```
+
+`.env` 里的三项安全相关变量：
+
+- `WEREAD_API_KEY`：微信读书网关 Key，只在服务端用。
+- `SITE_PASSWORD`：管理员站点口令。访客默认就能浏览和使用已配置的书籍，
+  但**同步 / 备份 / 导出 / 新增书籍**等管理操作需要点右上角「管理员登录」并输入此口令。
+  务必改成 16 位以上随机串。
+- `SESSION_SECRET`：管理员 Cookie 的 HMAC 签名密钥，必须随机且保密。
+  生成：`openssl rand -hex 32`。泄露会让他人伪造管理员身份。
 
 **3. 进程守护（systemd）**
 
@@ -93,34 +102,47 @@ systemctl daemon-reload && systemctl enable --now reading-cards
 journalctl -u reading-cards -f      # 看启动日志，应看到自动备份那一行
 ```
 
-**4. 反向代理 + HTTPS + 访问口令**
+**4. 反向代理 + HTTPS（无需 basic_auth）**
 
-**这一步不能省。** 应用本身没有登录系统，直接暴露到公网等于把你的全部笔记、感悟、
-收藏公开，任何人还能改。
+应用**已内置身份模型**，所以代理层不必再加口令：
 
-`Caddyfile`（Caddy 自动申请证书）：
+- **访客（默认）**：任何人都能直接打开站点，浏览已配置的书籍与卡片，并写下自己的
+  感悟 / 收藏 / 复习记录——这些数据按 `guest:<随机UUID>` 隔离，互不干扰，也看不到
+  管理员的数据。
+- **管理员**：点右上角「管理员登录」、输入 `.env` 里的 `SITE_PASSWORD` 后，才出现
+  「同步微信读书 / 备份 / 导出 / 新增书籍」等按钮。
+
+因此 Caddy 只做反向代理 + HTTPS，把口令鉴权下沉到应用内：
 
 ```
-reading.你的域名.com {
-    basic_auth {
-        gale $2a$14$替换成bcrypt哈希
-    }
+# 已有服务在 :80，本站点用新端口 8899，互不覆盖
+:8899 {
     reverse_proxy 127.0.0.1:4321
 }
 ```
 
-生成哈希：`caddy hash-password --plaintext '你的口令'`
+> 如果你用域名（推荐，Caddy 自动签证书）：把 `:8899` 换成 `reading.你的域名.com { … }` 即可。
+> 端口 8899 需已在防火墙放行（已为你添加）。
 
-Nginx 的等价写法是 `auth_basic` + `auth_basic_user_file`（用 `htpasswd` 生成），
-证书用 certbot。
+Nginx 等价写法就是 `location / { proxy_pass http://127.0.0.1:4321; }` + certbot，
+同样**不要**加 `auth_basic`（鉴权在应用里）。
 
 **5. 验证**
 
 ```bash
-curl -u gale:口令 https://reading.你的域名.com/api/stats
+# 公开接口，访客即可访问
+curl https://你的站点:8899/api/stats
+# 应返回 {"books":...,"keyConfigured":true,...}
+
+# 管理员登录（成功才出现管理按钮）
+curl -s -X POST https://你的站点:8899/api/login \
+  -H 'Content-Type: application/json' \
+  -d '{"password":"你的SITE_PASSWORD"}'
+# 应返回 {"ok":true,"role":"owner"}，并在响应头 Set-Cookie 里下发 owner_session
 ```
 
-应返回 `{"books":...,"keyConfigured":true,...}`。
+> 注意：管理操作（如 `/api/sync`）需要携带登录后的 `owner_session` Cookie。
+> 浏览器登录后自动带；命令行自测可 `curl -c cookies.txt -b cookies.txt …`。
 
 ### 两个必须处理的运维点
 
@@ -191,16 +213,18 @@ curl -u gale:口令 https://reading.你的域名.com/api/stats
 ## 部署前安全清单
 
 - [ ] `.env` 权限 600，且不在版本库（`.gitignore` 已包含）
-- [ ] 公网访问加了访问口令（Basic Auth 或自建登录）
-- [ ] 全站 HTTPS
+- [ ] 访客可公开浏览，但管理操作（同步/备份/导出/新增书籍）受应用内 `SITE_PASSWORD` 保护
+- [ ] `SESSION_SECRET` 随机且保密，未写死默认值上线
+- [ ] 全站 HTTPS（Caddy 自动签，或 certbot）
 - [ ] `data/backups/` 有异地副本
 - [ ] 确认 `WEREAD_API_KEY` 没有出现在任何前端文件、日志、导出的 JSON 里
-- [ ] 如果换域名：云服务的 Origin 校验是精确匹配，换域名会打断登录
+- [ ] 如果换域名：云服务的 Origin 校验是精确匹配，换域名会打断同步
 
 ---
 
 ## 迁移路径建议
 
 1. 现在 → **方案 A**：半天，拿到可用链接，数据仍在你手里
-2. 如果要给评委/朋友看：在方案 A 上开一个只读访客口令（需要小改：加个只读模式）
+2. 给评委/朋友看 → 方案 A **已内置访客模式**：默认访客、数据按 UUID 隔离、管理员口令登录，
+   直接把链接发出去即可，无需另建只读账号
 3. 真要面向所有人 → 方案 C，独立立项，不要和竞赛交付混在一起

@@ -26,10 +26,17 @@
     <button class="tab" data-view="dashboard">成长</button>
   </nav>
   <div class="topbar-right">
-    <button class="btn ghost" id="btnBackup" title="把数据库存一份到 data/backups（保留最近 7 份）">备份</button>
-    <button class="btn ghost" id="btnSync">同步微信读书</button>
+    <button class="btn ghost admin-only" id="btnBackup" title="把数据库存一份到 data/backups（保留最近 7 份）">备份</button>
+    <button class="btn ghost admin-only" id="btnSync">同步微信读书</button>
+    <button class="btn ghost" id="btnAdmin">管理员登录</button>
+    <button class="btn ghost hidden" id="btnLogout">退出登录</button>
   </div>
 </header>
+
+<div class="modebar guest" id="modeBar">
+  <span class="modebar-dot"></span>
+  <span class="modebar-tx" id="modeText">访客模式 · 以游客身份浏览，你写的感悟与收藏仅自己可见</span>
+</div>
 
 <main class="wrap">
 
@@ -118,7 +125,7 @@
         <label class="chk"><input type="checkbox" id="bookHasNotes" checked /> 只看有划线的</label>
       </div>
       <div class="tool-right">
-        <button class="btn primary" id="btnAddBook">+ 新增书籍</button>
+        <button class="btn primary admin-only" id="btnAddBook">+ 新增书籍</button>
       </div>
     </div>
     <div class="books" id="bookList"></div>
@@ -132,7 +139,7 @@
         <span class="tip" id="topicTip"></span>
       </div>
       <div class="tool-right">
-        <button class="btn ghost" id="btnRebuildTopics">重新聚类</button>
+        <button class="btn ghost admin-only" id="btnRebuildTopics">重新聚类</button>
       </div>
     </div>
     <div id="topicWrap">
@@ -167,7 +174,7 @@
       </div>
     </div>
     <div id="dashBody"></div>
-    <div class="panel">
+    <div class="panel admin-only" id="dashBackupPanel">
       <h3>数据备份</h3>
       <p class="ph">你写下的感悟、收藏和复习记录只存在本地这一个文件里。
         服务每天首次启动会自动备份一次，保留最近 7 份。</p>
@@ -222,6 +229,19 @@
     <div class="modal-foot">
       <button class="btn ghost" id="shCancel">关闭</button>
       <button class="btn primary" id="shDown">下载图片</button>
+    </div>
+  </div>
+</div>
+
+<!-- 管理员登录 -->
+<div class="modal hidden" id="loginModal">
+  <div class="modal-box" style="max-width:360px">
+    <h3>管理员登录</h3>
+    <p class="modal-sub">输入站点口令后，可同步微信读书、备份与导出数据、新增书籍</p>
+    <label>站点口令<input class="input" id="loginPwd" type="password" placeholder="请输入口令" autocomplete="current-password" /></label>
+    <div class="modal-foot">
+      <button class="btn ghost" id="loginCancel">取消</button>
+      <button class="btn primary" id="loginOk">登录</button>
     </div>
   </div>
 </div>

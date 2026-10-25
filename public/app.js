@@ -1134,9 +1134,75 @@
     toast('已导出 Markdown');
   });
 
+  /* ---------- 访客 / 管理员模式 ---------- */
+  async function applyMode() {
+    let me = { role: 'guest', owner: false, keyConfigured: false };
+    try { me = await api('/api/me'); } catch (e) { /* 默认访客 */ }
+    state.role = me.role;
+    state.owner = !!me.owner;
+    state.uid = me.uid || (me.owner ? 'owner' : 'guest');
+    state.keyConfigured = !!me.keyConfigured;
+
+    const isOwner = !!me.owner;
+    $('#modeText').textContent = isOwner
+      ? '管理员模式 · 已登录：可同步 / 备份 / 导出 / 管理书籍'
+      : '访客模式 · 以游客身份浏览，你写的感悟与收藏仅自己可见';
+    $('#modeBar').classList.toggle('guest', !isOwner);
+    $('#modeBar').classList.toggle('owner', isOwner);
+
+    $$('.admin-only').forEach((el) => el.classList.toggle('hidden', !isOwner));
+    $('#btnAdmin').classList.toggle('hidden', isOwner);
+    $('#btnLogout').classList.toggle('hidden', !isOwner);
+
+    // 访客不展示「未配置 Key」提示（那是给管理员看的）
+    if (!isOwner) setupBar.classList.add('hidden');
+    else if (state.keyConfigured) setupBar.classList.add('hidden');
+    else resetSetup();
+  }
+
+  function showLogin() {
+    $('#loginPwd').value = '';
+    $('#loginModal').classList.remove('hidden');
+    setTimeout(() => $('#loginPwd').focus(), 30);
+  }
+  function hideLogin() { $('#loginModal').classList.add('hidden'); }
+
+  async function doLogin() {
+    const pwd = $('#loginPwd').value;
+    const ok = $('#loginOk');
+    ok.disabled = true;
+    try {
+      const r = await api('/api/login', { method: 'POST', body: { password: pwd } });
+      if (!r.ok) throw new Error(r.error || '登录失败');
+      hideLogin();
+      toast('已以管理员身份登录');
+      await applyMode();
+      await renderStats(); loadBookOptions();
+      if (state.view === 'today') renderToday(true);
+      if (state.view === 'books') renderBooks();
+    } catch (e) {
+      toast(e.message || '口令错误');
+    } finally {
+      ok.disabled = false;
+    }
+  }
+
+  async function doLogout() {
+    try { await api('/api/logout', { method: 'POST', body: {} }); } catch (e) {}
+    toast('已退出管理员模式');
+    await applyMode();
+  }
+
+  $('#btnAdmin').addEventListener('click', showLogin);
+  $('#btnLogout').addEventListener('click', doLogout);
+  $('#loginCancel').addEventListener('click', hideLogin);
+  $('#loginOk').addEventListener('click', doLogin);
+  $('#loginPwd').addEventListener('keydown', (e) => { if (e.key === 'Enter') doLogin(); });
+
   /* ---------- 启动 ---------- */
   (async function boot() {
     await renderStats();
+    await applyMode();
     await loadBookOptions();
     await switchView('today');
 

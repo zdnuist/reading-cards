@@ -423,7 +423,22 @@ button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit
 .empty p{margin:0 auto;max-width:460px;font-size:13px;line-height:1.8}
 .empty .btn{display:inline-block;margin-top:16px}
 
+/* ---------- 访客 / 管理员模式条 ---------- */
+.modebar{
+  display:flex;align-items:center;gap:9px;
+  max-width:1180px;margin:0 auto;padding:9px 28px 0;
+  font-size:12.5px;color:var(--ink-2);
+}
+.modebar-dot{
+  width:8px;height:8px;border-radius:50%;flex-shrink:0;
+  background:var(--green);box-shadow:0 0 0 3px var(--green-soft);
+}
+.modebar.guest .modebar-dot{background:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.modebar-tx{line-height:1.5}
+
 @media(max-width:760px){
+  .modebar{padding:8px 16px 0;font-size:12px}
+}
   .topbar{flex-wrap:wrap;gap:10px;padding:11px 16px}
   /* 注意：基础规则里 .tabs 有 flex:1（即 flex-basis:0%），此时 width:100% 会被 flex 忽略，
      必须用 flex-basis 才能让标签栏独占一行 */

@@ -21,7 +21,95 @@ export function getDb() {
   _db.exec('PRAGMA journal_mode = WAL');
   _db.exec('PRAGMA foreign_keys = ON');
   migrate(_db);
+  migrateV2(_db);
   return _db;
+}
+
+/** 列是否存在（用于幂等迁移） */
+function hasColumn(db, table, col) {
+  return db.prepare(`PRAGMA table_info(${table})`).all().some((r) => r.name === col);
+}
+
+/**
+ * 多用户隔离迁移：
+ * - insights / review_log：加 user_id 列
+ * - likes / favorites / reviews / checkin：把 user_id 并入主键/唯一约束（重建表）
+ * 现有数据全部归到 'owner'。幂等，可重复执行。
+ */
+function migrateV2(db) {
+  if (!hasColumn(db, 'insights', 'user_id')) {
+    db.exec(`ALTER TABLE insights ADD COLUMN user_id TEXT NOT NULL DEFAULT 'owner'`);
+  }
+  if (!hasColumn(db, 'review_log', 'user_id')) {
+    db.exec(`ALTER TABLE review_log ADD COLUMN user_id TEXT NOT NULL DEFAULT 'owner'`);
+  }
+  if (!hasColumn(db, 'likes', 'user_id')) {
+    db.exec(`
+      CREATE TABLE likes_new (
+        target_type TEXT NOT NULL,
+        target_id   INTEGER NOT NULL,
+        user_id     TEXT NOT NULL DEFAULT 'owner',
+        created_at  INTEGER,
+        PRIMARY KEY (target_type, target_id, user_id)
+      );
+      INSERT INTO likes_new (target_type,target_id,user_id,created_at)
+        SELECT target_type,target_id,'owner',created_at FROM likes;
+      DROP TABLE likes;
+      ALTER TABLE likes_new RENAME TO likes;
+    `);
+  }
+  if (!hasColumn(db, 'favorites', 'user_id')) {
+    db.exec(`
+      CREATE TABLE favorites_new (
+        id          INTEGER PRIMARY KEY AUTOINCREMENT,
+        target_type TEXT NOT NULL,
+        target_id   INTEGER NOT NULL,
+        user_id     TEXT NOT NULL DEFAULT 'owner',
+        note        TEXT,
+        created_at  INTEGER,
+        UNIQUE (target_type, target_id, user_id)
+      );
+      INSERT INTO favorites_new (id,target_type,target_id,user_id,note,created_at)
+        SELECT id,target_type,target_id,'owner',note,created_at FROM favorites;
+      DROP TABLE favorites;
+      ALTER TABLE favorites_new RENAME TO favorites;
+      CREATE INDEX IF NOT EXISTS idx_fav_time ON favorites(created_at DESC);
+    `);
+  }
+  if (!hasColumn(db, 'reviews', 'user_id')) {
+    db.exec(`
+      CREATE TABLE reviews_new (
+        target_type   TEXT NOT NULL,
+        target_id     INTEGER NOT NULL,
+        user_id       TEXT NOT NULL DEFAULT 'owner',
+        stage         INTEGER DEFAULT 0,
+        due_date      TEXT,
+        last_reviewed TEXT,
+        review_count  INTEGER DEFAULT 0,
+        PRIMARY KEY (target_type, target_id, user_id)
+      );
+      INSERT INTO reviews_new (target_type,target_id,user_id,stage,due_date,last_reviewed,review_count)
+        SELECT target_type,target_id,'owner',stage,due_date,last_reviewed,review_count FROM reviews;
+      DROP TABLE reviews;
+      ALTER TABLE reviews_new RENAME TO reviews;
+      CREATE INDEX IF NOT EXISTS idx_rev_due ON reviews(due_date);
+    `);
+  }
+  if (!hasColumn(db, 'checkin', 'user_id')) {
+    db.exec(`
+      CREATE TABLE checkin_new (
+        day        TEXT NOT NULL,
+        user_id    TEXT NOT NULL DEFAULT 'owner',
+        cards_done INTEGER DEFAULT 0,
+        created_at INTEGER,
+        PRIMARY KEY (day, user_id)
+      );
+      INSERT INTO checkin_new (day,user_id,cards_done,created_at)
+        SELECT day,'owner',cards_done,created_at FROM checkin;
+      DROP TABLE checkin;
+      ALTER TABLE checkin_new RENAME TO checkin;
+    `);
+  }
 }
 
 function migrate(db) {
