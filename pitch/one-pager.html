@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>流动的书 · 一页纸介绍</title>
+<style>
+  :root{
+    --ink:#3a2c1e; --ink-soft:#6b5a45; --paper:#fbf6ec; --paper2:#f5ecdb;
+    --line:#e7dcc6; --accent:#96551f; --accent2:#8a5a2b; --green:#0f6e56;
+    --serif:"Songti SC","Noto Serif CJK SC","Source Han Serif SC",Georgia,serif;
+    --sans:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--paper2);color:var(--ink);font-family:var(--sans);line-height:1.7;-webkit-font-smoothing:antialiased}
+  .page{max-width:880px;margin:0 auto;background:var(--paper);min-height:100vh;
+    box-shadow:0 0 0 1px var(--line);padding:0 0 48px}
+  header{padding:52px 48px 40px;border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,#fdf8ee,#fbf6ec)}
+  .brand{display:flex;align-items:baseline;gap:12px}
+  .brand h1{font-family:var(--serif);font-size:38px;letter-spacing:2px;font-weight:600;color:var(--ink)}
+  .brand .tag{font-size:12px;color:#fff;background:var(--accent);border-radius:999px;padding:3px 12px;letter-spacing:1px}
+  .slogan{margin-top:14px;font-family:var(--serif);font-size:19px;color:var(--ink-soft)}
+  .slogan b{color:var(--accent2);font-weight:600}
+  .cta{margin-top:26px;display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-size:14px;
+    padding:10px 20px;border-radius:999px;border:1px solid var(--line);color:var(--ink);background:#fff}
+  .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:500}
+  .btn.primary:hover{background:var(--accent2)}
+  .meta{margin-top:18px;font-size:12.5px;color:#a08a68}
+  section{padding:38px 48px;border-bottom:1px solid var(--line)}
+  section:last-of-type{border-bottom:none}
+  h2{font-family:var(--serif);font-size:22px;color:var(--ink);margin-bottom:18px;display:flex;align-items:center;gap:10px}
+  h2::before{content:"";width:6px;height:22px;background:var(--accent);border-radius:3px;display:inline-block}
+  .lede{font-size:15px;color:var(--ink-soft);max-width:640px}
+  .grid{display:grid;gap:16px}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px 22px}
+  .card h3{font-size:15px;color:var(--ink);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+  .card p{font-size:13.5px;color:var(--ink-soft)}
+  .num{font-family:var(--serif);font-size:13px;color:var(--accent);border:1px solid var(--line);
+    width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex:none}
+  .pain{background:#f7efe2;border-left:3px solid #c98a3a;border-radius:8px;padding:14px 18px;margin-bottom:12px;font-size:14px}
+  .pain b{color:#8a5a2b}
+  .flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+  .step{flex:1;min-width:180px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;position:relative}
+  .step .k{font-family:var(--serif);font-size:26px;color:var(--accent)}
+  .step h4{font-size:14px;margin:6px 0 6px}
+  .step p{font-size:12.5px;color:var(--ink-soft)}
+  .arrow{align-self:center;color:#c9b48d;font-size:22px;padding:0 6px}
+  .pill{display:inline-block;font-size:12px;background:#eef4ea;color:var(--green);border:1px solid #cfe0c4;border-radius:999px;padding:3px 12px;margin:3px 6px 3px 0}
+  .stat{display:flex;gap:28px;flex-wrap:wrap;margin-top:6px}
+  .stat .s b{font-family:var(--serif);font-size:30px;color:var(--accent);display:block}
+  .stat .s span{font-size:12.5px;color:var(--ink-soft)}
+  footer{padding:28px 48px;font-size:12px;color:#a08a68;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  .quote{font-family:var(--serif);font-size:16px;color:var(--ink-soft);text-align:center;padding:8px 0 4px;font-style:italic}
+  @media(max-width:640px){
+    header,section,footer{padding-left:22px;padding-right:22px}
+    .g2,.g3{grid-template-columns:1fr}
+    .brand h1{font-size:30px}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="brand">
+      <h1>流动的书</h1>
+      <span class="tag">阅读复习助手</span>
+    </div>
+    <p class="slogan">把读过的书，真正<b>内化</b>进你的生活 —— 划线不再沉睡，而是每天<b>重新经过你一次</b>。</p>
+    <div class="cta">
+      <a class="btn primary" href="http://43.142.123.164:8899" target="_blank" rel="noopener">▶ 在线体验</a>
+      <span class="meta">打开即访客 · 免密 · 数据每人隔离 · 移动端自适应</span>
+    </div>
+    <div class="meta">WorkBuddy「1024 造物挑战」程序员节应用创作大赛 · 作品提交</div>
+  </header>
+
+  <section>
+    <h2>我们解决的痛点</h2>
+    <div class="pain"><b>读了很多书，划线很多，却想不起来用过。</b>微信读书里的成百上千条划线，划完就沉底，再没翻开过第二次。</div>
+    <div class="pain"><b>「收藏 = 学会」是一种幻觉。</b>知识若不曾被你复述、追问、实践，就只是别人脑子里的过客。</div>
+    <p class="lede">「流动的书」把静态的划线，变成会<b>流动、会重逢</b>的复习卡片，并用 AI 帮你把每一句话真正读懂。</p>
+  </section>
+
+  <section>
+    <h2>核心方案</h2>
+    <p class="lede" style="margin-bottom:22px">一条被验证的学习闭环：<b>划线 → 智能排期复习 → AI 解读内化 → 写下感悟与行动</b>。让过去的你和现在的你，每天重逢一次。</p>
+    <div class="flow">
+      <div class="step"><div class="k">01</div><h4>自动汇聚</h4><p>同步微信读书划线，按“值得回味”的规则变成每日卡片。</p></div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="k">02</div><h4>智能排期</h4><p>遗忘曲线算法安排复习：忘了/记得/简单，决定下次何时再见。</p></div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="k">03</div><h4>AI 内化</h4><p>对划线生成解读、跨书联想与苏格拉底式追问，逼你真正思考。</p></div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="k">04</div><h4>落成行动</h4><p>写下此刻感悟与“因此做了什么”，知识才真正长在你身上。</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>功能一览</h2>
+    <div class="grid g2">
+      <div class="card"><h3>📅 每日精选</h3><p>每天 0 点自动换新 6 张卡片，配 AI 每日导语；支持“换一批”与今日打卡。</p></div>
+      <div class="card"><h3>🃏 翻卡复习</h3><p>正面划线原文、背面当时的想法与现在的感悟；三档记忆反馈驱动遗忘曲线排期。</p></div>
+      <div class="card"><h3>✨ AI 解读</h3><p>一键生成解读 / 联想 / 追问；大模型与内置引擎双通道，离线演示也稳定可用。</p></div>
+      <div class="card"><h3>🧭 主题聚类</h3><p>不同书的划线自动聚成主题网络，看看“同一件事，不同作者怎么说”。</p></div>
+      <div class="card"><h3>📊 学习仪表盘</h3><p>连续天数、卡片总数、待复习、感悟与行动的分布与趋势一目了然。</p></div>
+      <div class="card"><h3>👥 访客模式</h3><p>打开即访客，人人独立空间；管理操作需站点口令，数据互不打扰。</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>技术与工程亮点</h2>
+    <div class="grid g2">
+      <div class="card"><h3>零第三方依赖</h3><p>仅用 Node.js 内置模块（http / sqlite / crypto）+ 原生前端，部署极简、攻击面极小。</p></div>
+      <div class="card"><h3>多用户数据隔离</h3><p>共享书库与按 user_id 隔离的交互数据分层建模；SQLite 幂等迁移，平滑升级。</p></div>
+      <div class="card"><h3>应用内鉴权</h3><p>Cookie 会话（HMAC 签名）+ 口令 timingSafeEqual 校验，管理操作服务端强制拦截。</p></div>
+      <div class="card"><h3>AI 可插拔</h3><p>统一抽象层：配置 LLM_* 即接大模型，未配置则回退内置引擎，并带结果缓存。</p></div>
+    </div>
+    <div style="margin-top:18px">
+      <span class="pill">Node 22 · node:sqlite</span><span class="pill">原生 HTML/CSS/JS</span>
+      <span class="pill">Caddy 反代</span><span class="pill">systemd 部署</span>
+      <span class="pill">OpenAI 兼容 LLM</span><span class="pill">Canvas 海报分享</span>
+    </div>
+  </section>
+
+  <section>
+    <h2>在线数据</h2>
+    <div class="stat">
+      <div class="s"><b>920</b><span>本书</span></div>
+      <div class="s"><b>4000+</b><span>条划线卡片</span></div>
+      <div class="s"><b>40+</b><span>个主题聚类</span></div>
+      <div class="s"><b>实时</b><span>遗忘曲线排期</span></div>
+    </div>
+    <p class="quote">“重要的东西，用眼睛是看不见的。” —— 让读过的字，重新经过你。</p>
+  </section>
+
+  <footer>
+    <span>「流动的书」 · 用 WorkBuddy 从 0 到公网部署</span>
+    <span>在线体验：http://43.142.123.164:8899</span>
+  </footer>
+
+</div>
+</body>
+</html>
