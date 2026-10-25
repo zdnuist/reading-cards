@@ -104,10 +104,21 @@
     <div class="grid g2">
       <div class="card"><h3>📅 每日精选</h3><p>每天 0 点自动换新 6 张卡片，配 AI 每日导语；支持“换一批”与今日打卡。</p></div>
       <div class="card"><h3>🃏 翻卡复习</h3><p>正面划线原文、背面当时的想法与现在的感悟；三档记忆反馈驱动遗忘曲线排期。</p></div>
-      <div class="card"><h3>✨ AI 解读</h3><p>一键生成解读 / 联想 / 追问；大模型与内置引擎双通道，离线演示也稳定可用。</p></div>
+      <div class="card"><h3>✨ AI 解读（大模型驱动）</h3><p>基于 Qwen 大模型对划线实时生成解读 / 跨书联想 / 苏格拉底追问；大模型与内置引擎双通道，断网演示也稳定可用。</p></div>
       <div class="card"><h3>🧭 主题聚类</h3><p>不同书的划线自动聚成主题网络，看看“同一件事，不同作者怎么说”。</p></div>
       <div class="card"><h3>📊 学习仪表盘</h3><p>连续天数、卡片总数、待复习、感悟与行动的分布与趋势一目了然。</p></div>
       <div class="card"><h3>👥 访客模式</h3><p>打开即访客，人人独立空间；管理操作需站点口令，数据互不打扰。</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>AI 解读 · 真实示例</h2>
+    <p class="lede" style="margin-bottom:16px">下面这段由线上大模型对一条真实划线<b>实时生成</b>（非预写文案）：</p>
+    <div class="card" style="border-left:3px solid #c98a3a">
+      <p style="font-family:var(--serif);color:var(--ink);margin-bottom:12px">划线原文：「成熟不是变得复杂，而是重新拥有孩子般清澈的眼光。」</p>
+      <p style="font-size:13px;margin-bottom:6px"><b style="color:var(--accent2)">解读 ·</b> 真正的成熟并非戴上世故的面具，而是历经沧桑后仍能保有对世界最初的真诚与好奇。</p>
+      <p style="font-size:13px;margin-bottom:6px"><b style="color:var(--accent2)">联想 ·</b> 正如《小王子》中狐狸所说，真正重要的东西用眼睛是看不见的——与「重新拥有清澈眼光」的内核不谋而合。</p>
+      <p style="font-size:13px"><b style="color:var(--accent2)">追问 ·</b> 哪些曾让你觉得「成熟」的行为，其实是对纯真眼光的背离？</p>
     </div>
   </section>
 
@@ -117,12 +128,12 @@
       <div class="card"><h3>零第三方依赖</h3><p>仅用 Node.js 内置模块（http / sqlite / crypto）+ 原生前端，部署极简、攻击面极小。</p></div>
       <div class="card"><h3>多用户数据隔离</h3><p>共享书库与按 user_id 隔离的交互数据分层建模；SQLite 幂等迁移，平滑升级。</p></div>
       <div class="card"><h3>应用内鉴权</h3><p>Cookie 会话（HMAC 签名）+ 口令 timingSafeEqual 校验，管理操作服务端强制拦截。</p></div>
-      <div class="card"><h3>AI 可插拔</h3><p>统一抽象层：配置 LLM_* 即接大模型，未配置则回退内置引擎，并带结果缓存。</p></div>
+      <div class="card"><h3>AI 可插拔（已上线）</h3><p>线上由 Qwen 大模型实时驱动；统一抽象层可切换任意 OpenAI 兼容端点，失效自动回退内置引擎并缓存。</p></div>
     </div>
     <div style="margin-top:18px">
       <span class="pill">Node 22 · node:sqlite</span><span class="pill">原生 HTML/CSS/JS</span>
       <span class="pill">Caddy 反代</span><span class="pill">systemd 部署</span>
-      <span class="pill">OpenAI 兼容 LLM</span><span class="pill">Canvas 海报分享</span>
+      <span class="pill">Qwen 大模型实时解读</span><span class="pill">Canvas 海报分享</span>
     </div>
   </section>
 
