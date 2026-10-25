@@ -16,6 +16,7 @@
 const BASE = process.env.LLM_BASE_URL || 'https://api.openai.com/v1';
 const KEY = process.env.LLM_API_KEY || '';
 const MODEL = process.env.LLM_MODEL || 'gpt-4o-mini';
+const TIMEOUT = Number(process.env.LLM_TIMEOUT_MS || 45000);
 
 export const aiEnabled = Boolean(KEY);
 
@@ -77,6 +78,14 @@ function templateDaily(text) {
 
 /* ---------------- 大模型调用（OpenAI 兼容） ---------------- */
 
+function parseJsonLoose(s) {
+  let t = String(s).trim().replace(/^```(?:json)?/i, '').replace(/```\s*$/, '').trim();
+  try { return JSON.parse(t); } catch { /* continue */ }
+  const i = t.indexOf('{'), j = t.lastIndexOf('}');
+  if (i >= 0 && j > i) { try { return JSON.parse(t.slice(i, j + 1)); } catch { /* continue */ } }
+  throw new Error('llm json parse failed');
+}
+
 async function llmInterpret(text, ctx = {}) {
   const mode = ctx.mode || 'highlight';
   const sys =
@@ -94,7 +103,7 @@ async function llmInterpret(text, ctx = {}) {
   });
 
   const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), 12000);
+  const timer = setTimeout(() => ctrl.abort(), TIMEOUT);
   let data;
   try {
     const r = await fetch(`${BASE}/chat/completions`, {
@@ -103,7 +112,6 @@ async function llmInterpret(text, ctx = {}) {
       body: JSON.stringify({
         model: MODEL,
         temperature: 0.85,
-        response_format: { type: 'json_object' },
         messages: [
           { role: 'system', content: sys },
           { role: 'user', content: user },
@@ -111,7 +119,10 @@ async function llmInterpret(text, ctx = {}) {
       }),
       signal: ctrl.signal,
     });
-    if (!r.ok) throw new Error(`llm http ${r.status}`);
+    if (!r.ok) {
+      const detail = await r.text().catch(() => '');
+      throw new Error(`llm http ${r.status} ${detail.slice(0, 160)}`);
+    }
     data = await r.json();
   } finally {
     clearTimeout(timer);
@@ -119,7 +130,7 @@ async function llmInterpret(text, ctx = {}) {
 
   const content = data?.choices?.[0]?.message?.content;
   if (!content) throw new Error('llm empty');
-  const c = JSON.parse(content);
+  const c = parseJsonLoose(content);
 
   if (mode === 'daily') {
     return {
