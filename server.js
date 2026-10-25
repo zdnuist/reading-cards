@@ -84,7 +84,7 @@ function requireOwner(req) {
 /* ================= 查询构造 ================= */
 
 // 注意：liked / favorited / insight_count 三个子查询都按当前用户过滤（? =
-// user_id），所以任何用到 CARD_SELECT 的查询都必须在三个 ? 处先绑定 uid，
+// user_id），所以任何用到 CARD_SELECT 的查询都必须在四个 ? 处先绑定 uid，
 // 再绑定 WHERE 自身的参数。
 const CARD_SELECT = `
   SELECT h.id, h.book_id, h.chapter_title, h.mark_text, h.create_time, h.source, h.popularity,
@@ -326,7 +326,7 @@ const routes = {
     const total = db().prepare(`SELECT COUNT(*) c FROM highlights h LEFT JOIN books b ON b.book_id=h.book_id WHERE ${w}`).get(...params).c || 0;
     const rows = db()
       .prepare(`${CARD_SELECT} WHERE ${w} ORDER BY h.create_time DESC LIMIT ? OFFSET ?`)
-      .all(req.uid, req.uid, req.uid, ...params, size, (page - 1) * size);
+      .all(req.uid, req.uid, req.uid, req.uid, ...params, size, (page - 1) * size);
     return { total, page, size, cards: rows };
   },
 
