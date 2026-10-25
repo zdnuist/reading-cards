@@ -20,6 +20,7 @@ import {
 } from './db.js';
 import { runSync, syncState, stats } from './weread.js';
 import { buildTopics } from './topics.js';
+import { interpret, aiEnabled } from './ai.js';
 import { autoBackup, createBackup, pruneBackups, listBackups, exportUserData, BACKUP_DIR } from './backup.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -296,6 +297,26 @@ const routes = {
     const includeShelf = body.includeShelf !== false;
     runSync({ limit, includeShelf }); // 后台跑，不阻塞响应
     return { started: true };
+  },
+
+  /* ---- 智能解读（访客/管理员均可使用，按内容缓存） ---- */
+  'POST /api/ai/interpret': async ({ body }) => {
+    const text = String(body?.text || '').trim();
+    const mode = body?.mode === 'daily' ? 'daily' : 'highlight';
+    if (text.length < 4) return { error: '文本太短，无法解读' };
+    if (text.length > 2000) return { error: '文本过长' };
+
+    const cacheKey = `${mode}:${crypto.createHash('sha1').update(text).digest('hex')}`;
+    const hit = db().prepare('SELECT v, engine FROM ai_cache WHERE key = ?').get(cacheKey);
+    if (hit) {
+      const r = JSON.parse(hit.v);
+      return { ...r, engine: hit.engine, cached: true, aiEnabled };
+    }
+
+    const r = await interpret(text, { mode, book: body?.book, author: body?.author });
+    db().prepare('INSERT OR REPLACE INTO ai_cache(key, v, engine, created_at) VALUES (?, ?, ?, ?)')
+      .run(cacheKey, JSON.stringify(r), r.engine, Date.now());
+    return { ...r, cached: false, aiEnabled };
   },
 
   /* ---- 卡片 ---- */

@@ -154,6 +154,12 @@
           </div>
         </div>
 
+        <div class="sec ai-sec" id="aiSec-${c.id}">
+          <div class="sec-t">AI 解读 <span class="ai-tag" id="aiTag-${c.id}"></span></div>
+          <button class="btn ai-btn" data-act="ai-interpret" data-text="${esc(c.mark_text)}" data-book="${esc(c.book_title || '')}">✨ 让 AI 帮我读这一句</button>
+          <div class="ai-box" id="aiBox-${c.id}"></div>
+        </div>
+
         <div class="sec">
           <div class="sec-t">当时我在微信读书的想法</div>
           ${t && t.content
@@ -440,6 +446,30 @@
     box.innerHTML = d.cards.map(cardHTML).join('');
     $('#todayTip').textContent = `${d.cards.length} 张 · 每天 0 点自动换新`;
     relayout();
+    fillDailyIntro(d.cards);
+  }
+
+  /** 今日 AI 导语：把今天的卡片拼成一段提示，调用解读接口生成一句鼓励语（按日期缓存） */
+  async function fillDailyIntro(cards) {
+    const el = $('#dailyIntro');
+    if (!el) return;
+    const day = todayStr();
+    const cacheKey = 'dailyIntro:' + day;
+    try {
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) { el.innerHTML = `<span class="di-mark">✨</span><span>${esc(JSON.parse(cached))}</span>`; el.classList.remove('hidden'); return; }
+    } catch { /* ignore */ }
+    const text = cards.slice(0, 6).map((c) => `${c.book_title || ''}：${c.mark_text || ''}`).join('\n');
+    if (!text.trim()) return;
+    el.classList.add('hidden');
+    try {
+      const r = await api('/api/ai/interpret', { method: 'POST', body: { text, mode: 'daily' } });
+      if (r.interpretation) {
+        localStorage.setItem(cacheKey, JSON.stringify(r.interpretation));
+        el.innerHTML = `<span class="di-mark">✨</span><span>${esc(r.interpretation)}</span>`;
+        el.classList.remove('hidden');
+      }
+    } catch { /* 导语失败不影响主流程 */ }
   }
 
   async function shuffleToday() {
@@ -994,6 +1024,30 @@
         paintBack($('.card-back', card), d);
         toast('已删除');
         renderStats();
+      }
+
+      if (act === 'ai-interpret') {
+        const box = $('#aiBox-' + id);
+        const tag = $('#aiTag-' + id);
+        const text = btn.dataset.text || '';
+        const book = btn.dataset.book || '';
+        if (box.dataset.done === '1') { box.classList.toggle('collapsed'); return; }
+        box.dataset.done = '1';
+        box.classList.remove('collapsed');
+        box.innerHTML = '<div class="ai-loading">AI 正在读这一句…</div>';
+        try {
+          const r = await api('/api/ai/interpret', { method: 'POST', body: { text, book, mode: 'highlight' } });
+          tag.textContent = r.engine === 'llm' ? '· 大模型' : '· 内置引擎';
+          box.innerHTML = `
+            <div class="ai-line"><span class="ai-k">解读</span><p>${esc(r.interpretation)}</p></div>
+            ${r.association ? `<div class="ai-line"><span class="ai-k">联想</span><p>${esc(r.association)}</p></div>` : ''}
+            ${r.question ? `<div class="ai-line q"><span class="ai-k">追问</span><p>${esc(r.question)}</p></div>` : ''}
+            ${r.cached ? '<div class="ai-foot">（命中缓存）</div>' : ''}`;
+          toast('AI 解读已生成');
+        } catch (e) {
+          box.dataset.done = '0';
+          box.innerHTML = `<div class="ai-err">解读失败：${esc(e.message)}</div>`;
+        }
       }
     } catch (err) {
       toast(err.message || '操作失败');

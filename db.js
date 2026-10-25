@@ -250,6 +250,14 @@ function migrate(db) {
     topic_id     INTEGER
   );
   CREATE INDEX IF NOT EXISTS idx_ht_topic ON highlight_topics(topic_id);
+
+  -- 智能解读缓存（按 模式+文本哈希 命中，避免重复调用大模型 / 模板复用）
+  CREATE TABLE IF NOT EXISTS ai_cache (
+    key        TEXT PRIMARY KEY,
+    v          TEXT,
+    engine     TEXT,
+    created_at INTEGER
+  );
   `);
 }
 
