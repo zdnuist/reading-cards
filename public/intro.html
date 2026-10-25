@@ -61,7 +61,7 @@
   .dots i:nth-child(1){background:#e0655b}.dots i:nth-child(2){background:#e6a23c}.dots i:nth-child(3){background:#5bb97e}
   .url{flex:1;max-width:360px;margin-left:6px;font-size:12px;color:#a2947c;background:#fff;border:1px solid var(--line);border-radius:999px;padding:4px 14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .hero-shot{margin:44px auto 0;max-width:920px}
-  .hero-shot .frame img{width:100%;height:auto}
+  .frame img{width:100%;height:auto}
 
   /* 通用区块 */
   section{padding:70px 0}
@@ -96,7 +96,7 @@
   .f-list{list-style:none;margin-top:8px}
   .f-list li{position:relative;padding-left:26px;font-size:14.5px;color:var(--ink2);margin-bottom:9px}
   .f-list li::before{content:"";position:absolute;left:2px;top:.62em;width:8px;height:8px;border-radius:50%;background:var(--accent)}
-  .f-media .frame img{width:100%;height:auto}
+  .f-media{min-width:0}
   .tagai{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--green);background:var(--green-bg);border:1px solid #bfe0cc;border-radius:999px;padding:3px 12px;margin-bottom:12px}
   @media(max-width:900px){.feat{grid-template-columns:1fr;gap:28px}.feat.rev .f-media{order:0}}
 
@@ -159,7 +159,7 @@
 
       <div class="hero-shot frame">
       <div class="frame-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">https://43.142.123.164:8899 · 今日卡片</span></div>
-      <img src="/img/shot-home.png" alt="流动的书首页：今日卡片瀑布流、AI 每日导语与学习统计" width="1440" height="900" />
+      <img src="/img/shot-home.png" alt="流动的书首页：今日卡片瀑布流、AI 每日导语与学习统计" width="2880" height="1800" />
     </div>
   </div>
 </header>
@@ -206,14 +206,14 @@
       </div>
       <div class="f-media frame">
         <div class="frame-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">流动的书 · 今日卡片</span></div>
-        <img src="/img/shot-card.png" alt="一张每日精选卡片的正面：划线原文、书名与作者" width="520" height="700" />
+        <img src="/img/shot-card.png" alt="一张每日精选卡片的正面：划线原文、书名与作者" width="726" height="602" loading="lazy" />
       </div>
     </div>
 
     <div class="feat rev reveal" style="margin-top:80px">
       <div class="f-media frame">
         <div class="frame-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">流动的书 · 卡片背面</span></div>
-        <img src="/img/shot-back.png" alt="卡片背面：当时的想法、现在的感悟与行动记录" width="520" height="700" />
+        <img src="/img/shot-back.png" alt="卡片背面：当时的想法、现在的感悟与行动记录" width="726" height="602" loading="lazy" />
       </div>
       <div class="f-text">
         <div class="kicker">翻卡复习</div>
@@ -239,7 +239,7 @@
       </div>
       <div class="f-media frame">
         <div class="frame-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">流动的书 · AI 解读</span></div>
-        <img src="/img/shot-ai.png" alt="AI 对一条划线实时生成的解读、联想与追问" width="640" height="420" />
+        <img src="/img/shot-ai.png" alt="AI 对一条划线实时生成的解读、联想与追问" width="634" height="752" loading="lazy" />
       </div>
     </div>
   </div>
@@ -250,7 +250,7 @@
     <div class="feat rev reveal">
       <div class="f-media frame">
         <div class="frame-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">流动的书 · 主题聚类</span></div>
-        <img src="/img/shot-topics.png" alt="主题聚类：不同书的划线按主题聚成网络" width="1440" height="900" />
+        <img src="/img/shot-topics.png" alt="主题聚类：不同书的划线按主题聚成网络" width="2880" height="1800" loading="lazy" />
       </div>
       <div class="f-text">
         <div class="kicker">主题聚类</div>
@@ -267,7 +267,7 @@
       </div>
       <div class="f-media frame">
         <div class="frame-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">流动的书 · 成长</span></div>
-        <img src="/img/shot-dashboard.png" alt="成长仪表盘：连续天数、感悟行动分布与趋势图" width="1440" height="900" />
+        <img src="/img/shot-dashboard.png" alt="成长仪表盘：连续天数、感悟行动分布与趋势图" width="2880" height="1800" loading="lazy" />
       </div>
     </div>
   </div>
@@ -282,7 +282,7 @@
     </div>
     <div class="frame reveal" style="max-width:1000px;margin:0 auto">
       <div class="frame-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">流动的书 · 卡片库</span></div>
-      <img src="/img/shot-library.png" alt="卡片库：可按句子书名作者搜索的划线卡片网格" width="1440" height="900" />
+      <img src="/img/shot-library.png" alt="卡片库：可按句子书名作者搜索的划线卡片网格" width="2880" height="1800" loading="lazy" />
     </div>
   </div>
 </section>
@@ -298,7 +298,7 @@
       </div>
       <div class="f-media frame" style="max-width:300px;margin:0 auto">
         <div class="frame-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">手机端</span></div>
-        <img src="/img/shot-mobile.png" alt="手机端的今日卡片视图" width="390" height="844" />
+        <img src="/img/shot-mobile.png" alt="手机端的今日卡片视图" width="780" height="1688" loading="lazy" />
       </div>
     </div>
   </div>
