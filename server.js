@@ -611,7 +611,9 @@ const server = http.createServer(async (req, res) => {
   res.end(buf);
 });
 
-server.listen(PORT, () => {
+// 部署时建议 HOST=127.0.0.1，只让反代访问，不把应用端口暴露到公网
+const HOST = process.env.HOST || '0.0.0.0';
+server.listen(PORT, HOST, () => {
   console.log(`\n  流动的书 · 阅读复习助手\n  http://localhost:${PORT}\n  数据文件: ${path.join(__dirname, 'data/reading.db')}\n`);
   // 每天启动时自动备份一次：感悟和收藏一旦丢了就找不回来
   try {
