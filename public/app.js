@@ -59,6 +59,9 @@
   const state = {
     view: 'today',
     today: { day: '', cards: [] },
+    // 当前「今日卡片」牌组（含「换一批」后的随机牌组），切换 tab 回来时复用，避免被打回初始
+    todayCards: [],
+    todayDay: '',
     // 4000+ 张卡片，12 张/页要翻 300 多页，24 张/页更实际
     lib: { page: 1, size: 24, q: '', book: '', favOnly: false, total: 0, pages: 1 },
     detailCache: new Map(),
@@ -423,9 +426,18 @@
   /* ---------- 视图：今日 ---------- */
   async function renderToday(force = false) {
     const box = $('#todayCards');
+    const day = todayStr();
+    const dayChanged = state.todayDay && state.todayDay !== day;
+    // 已有缓存牌组、非强制刷新、且日期未变 → 直接复用，避免「换一批」后被覆盖
+    if (!force && !dayChanged && state.todayCards.length) {
+      paintToday(state.todayCards);
+      return;
+    }
     box.innerHTML = '<div class="empty">正在挑选今天的卡片…</div>';
     const d = await api('/api/cards/daily?n=6' + (force ? '&r=' + Date.now() : ''));
     state.today = d;
+    state.todayCards = d.cards;
+    state.todayDay = day;
     if (!d.cards.length) {
       const noKey = !state.keyConfigured;
       box.innerHTML = `
@@ -442,11 +454,17 @@
       $('#btnShuffle').disabled = true;
       return;
     }
+    paintToday(d.cards);
+  }
+
+  /** 把给定的牌组画到今日视图（初次/刷新/换一批/复用缓存 共用） */
+  function paintToday(cards) {
+    const box = $('#todayCards');
     $('#btnShuffle').disabled = false;
-    box.innerHTML = d.cards.map(cardHTML).join('');
-    $('#todayTip').textContent = `${d.cards.length} 张 · 每天 0 点自动换新`;
+    box.innerHTML = cards.map(cardHTML).join('');
+    $('#todayTip').textContent = `${cards.length} 张 · 每天 0 点自动换新`;
     relayout();
-    fillDailyIntro(d.cards);
+    fillDailyIntro(cards);
   }
 
   /** 今日 AI 导语：把今天的卡片拼成一段提示，调用解读接口生成一句鼓励语（按日期缓存） */
@@ -474,11 +492,17 @@
 
   async function shuffleToday() {
     const box = $('#todayCards');
-    const exclude = $$('.card', box).map((e) => e.dataset.id).join(',');
+    const exclude = (state.todayCards || []).map((c) => c.id).join(',');
     const d = await api(`/api/cards/random?n=6&exclude=${exclude}`);
-    box.innerHTML = d.cards.length
-      ? d.cards.map(cardHTML).join('')
-      : '<div class="empty"><b>没有更多卡片了</b>试试同步更多书籍</div>';
+    if (!d.cards.length) {
+      box.innerHTML = '<div class="empty"><b>没有更多卡片了</b>试试同步更多书籍</div>';
+      $('#todayTip').textContent = '随机一批 · 刷新或点「换一批」再换';
+      relayout();
+      return;
+    }
+    // 记住这次「换一批」的结果，切换 tab 回来时渲染同一批
+    state.todayCards = d.cards;
+    box.innerHTML = d.cards.map(cardHTML).join('');
     $('#todayTip').textContent = '随机一批 · 刷新或点「换一批」再换';
     relayout();
   }
